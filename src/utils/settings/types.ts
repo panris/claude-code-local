@@ -403,6 +403,23 @@ export const SettingsSchema = lazySchema(() =>
             'model ID (e.g. a Bedrock inference profile ARN). Typically set in managed settings by ' +
             'enterprise administrators.',
         ),
+      // Model configurations for multiple API providers
+      modelConfigs: z
+        .array(
+          z.object({
+            name: z.string().describe('Configuration name for display'),
+            provider: z.enum(['anthropic', 'openai', 'gemini', 'grok', 'custom']).describe('API provider type'),
+            apiKey: z.string().describe('API key for the provider'),
+            baseUrl: z.string().optional().describe('Custom base URL for API (optional)'),
+            model: z.string().describe('Model ID to use'),
+          }),
+        )
+        .optional()
+        .describe('List of model configurations for switching between different providers'),
+      activeModelConfig: z
+        .string()
+        .optional()
+        .describe('Name of the currently active model configuration'),
       // Whether to automatically approve all MCP servers in the project
       enableAllProjectMcpServers: z
         .boolean()

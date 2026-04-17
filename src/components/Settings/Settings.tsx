@@ -12,6 +12,7 @@ import { Pane, Tab, Tabs } from '@anthropic/ink'
 import { Status, buildDiagnostics } from './Status.js'
 import { Config } from './Config.js'
 import { Usage } from './Usage.js'
+import { ModelConfig } from './ModelConfig.js'
 import type {
   LocalJSXCommandContext,
   CommandResultDisplay,
@@ -23,7 +24,7 @@ type Props = {
     options?: { display?: CommandResultDisplay },
   ) => void
   context: LocalJSXCommandContext
-  defaultTab: 'Status' | 'Config' | 'Usage'
+  defaultTab: 'Status' | 'Config' | 'Usage' | 'Model'
 }
 
 export function Settings({
@@ -77,7 +78,8 @@ export function Settings({
     context: 'Settings',
     isActive:
       !tabsHidden &&
-      !(selectedTab === 'Config' && configOwnsEsc),
+      !(selectedTab === 'Config' && configOwnsEsc) &&
+      selectedTab !== 'Model',
   })
 
   const tabs = [
@@ -97,6 +99,13 @@ export function Settings({
     </Tab>,
     <Tab key="usage" title="Usage">
       <Usage />
+    </Tab>,
+    <Tab key="model" title="Model">
+      <ModelConfig
+        context={context}
+        onClose={onClose}
+        contentHeight={contentHeight}
+      />
     </Tab>,
   ]
 

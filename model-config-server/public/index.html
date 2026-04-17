@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code 模型配置管理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title { font-size: 18px; color: #fff; font-weight: 600; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+        
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+        
+        .btn-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .btn-success:hover { background: rgba(34, 197, 94, 0.3); }
+        
+        .btn-small { padding: 6px 12px; font-size: 12px; }
+        .btn-xs { padding: 4px 8px; font-size: 11px; }
+        
+        .config-list { display: flex; flex-direction: column; gap: 15px; }
+        
+        .config-group {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .config-group:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        .config-group.active {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .config-header {
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .config-info { flex: 1; }
+        
+        .config-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .config-badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            font-weight: 500;
+        }
+        
+        .config-meta {
+            font-size: 13px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .provider-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .provider-anthropic { background: rgba(212, 160, 23, 0.2); color: #d4a017; }
+        .provider-openai { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .provider-gemini { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .provider-grok { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .provider-custom { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+        .provider-ollama { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        
+        .config-actions { display: flex; gap: 8px; align-items: center; }
+        
+        .models-section {
+            padding: 15px 18px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .models-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .models-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .model-chip {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #aaa;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .model-chip:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .model-chip.active {
+            background: rgba(102, 126, 234, 0.3);
+            color: #fff;
+            border-color: #667eea;
+        }
+        
+        .model-chip.current {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border-color: #22c55e;
+        }
+        
+        .form-group { margin-bottom: 18px; }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #ccc;
+            font-weight: 500;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .form-input::placeholder { color: #666; }
+        
+        .form-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+        }
+        
+        .form-error {
+            font-size: 12px;
+            color: #ef4444;
+            margin-top: 6px;
+        }
+        
+        .models-input-container {
+            margin-top: 10px;
+        }
+        
+        .models-input-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .models-input-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(102, 126, 234, 0.2);
+            color: #fff;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        
+        .models-input-chip .remove {
+            cursor: pointer;
+            color: #888;
+            font-size: 16px;
+        }
+        
+        .models-input-chip .remove:hover { color: #ef4444; }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        
+        .modal {
+            background: linear-gradient(135deg, #1e1e3f 0%, #1a1a2e 100%);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: scale(0.9);
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.show .modal { transform: scale(1); }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .modal-title { font-size: 20px; color: #fff; font-weight: 600; }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+        
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .empty-state-icon { font-size: 56px; margin-bottom: 15px; }
+        
+        .json-output {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            color: #a0a0a0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(34, 197, 94, 0.95);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.error { background: rgba(239, 68, 68, 0.95); }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px;
+            border-radius: 10px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #888;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+        }
+        
+        .tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .status-ok { color: #22c55e; }
+        .status-error { color: #ef4444; }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Claude Code 模型配置管理</h1>
+        <p class="subtitle">管理多个 AI 模型配置组，支持一键切换 API Key 和模型</p>
+        
+        <div class="status-bar">
+            <span id="status-text"><span class="status-dot loading"></span>正在连接...</span>
+            <span id="config-path"></span>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('configs')">📋 配置列表</button>
+            <button class="tab" onclick="switchTab('json')">📄 JSON 预览</button>
+        </div>
+        
+        <div id="configs-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">配置组</span>
+                    <button class="btn btn-primary" onclick="openModal()">
+                        <span>+</span> 新增配置组
+                    </button>
+                </div>
+                <div id="config-list" class="config-list">
+                    <div class="empty-state">
+                        <div class="loading"></div>
+                        <p style="margin-top: 15px;">加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="json-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">settings.json 预览</span>
+                    <button class="btn btn-secondary" onclick="copyJson()">
+                        📋 复制
+                    </button>
+                </div>
+                <pre id="json-output" class="json-output">加载中...</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑配置组模态框 -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span id="modal-title" class="modal-title">新增配置组</span>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="config-form" onsubmit="saveConfig(event)">
+                <input type="hidden" id="edit-name" value="">
+                
+                <div class="form-group">
+                    <label class="form-label">配置组名称 *</label>
+                    <input type="text" id="config-name" class="form-input" placeholder="例如：豆包 API、OpenAI 官方" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">API 提供商 *</label>
+                    <select id="config-provider" class="form-select" onchange="onProviderChange()" required>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="openai">OpenAI (GPT)</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="grok">xAI Grok</option>
+                        <option value="custom">自定义 API</option>
+                        <option value="ollama">Ollama (本地模型)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">API Key *</label>
+                    <input type="password" id="config-apikey" class="form-input" placeholder="sk-..." required>
+                    <p class="form-hint" id="apikey-hint">对应环境变量: ANTHROPIC_API_KEY</p>
+                </div>
+
+                <div class="form-group" id="baseurl-group" style="display: none;">
+                    <label class="form-label">API 地址 (可选)</label>
+                    <input type="text" id="config-baseurl" class="form-input" placeholder="https://api.example.com/v1">
+                    <p class="form-hint" id="baseurl-hint">对应环境变量: OPENAI_BASE_URL</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">模型列表 (支持多个)</label>
+                    <p class="form-hint" id="models-hint">添加可用的模型名称，一个 API Key 可以调用多个模型</p>
+                    <div class="models-input-container">
+                        <div id="models-chip-list" class="models-input-list"></div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="model-input" class="form-input" placeholder="输入模型名称，按回车添加" style="flex: 1;">
+                            <button type="button" class="btn btn-secondary" onclick="addModel()">添加</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <span class="modal-title">⚠️ 确认删除</span>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p style="color: #ccc; margin-bottom: 25px; line-height: 1.6;">
+                确定要删除配置组 <strong id="delete-config-name" style="color: #fff;"></strong> 吗？<br>
+                <span style="color: #888; font-size: 13px;">此操作不可恢复</span>
+            </p>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // 预设模型列表
+        const PRESET_MODELS = {
+            anthropic: ['claude-opus-4-6', 'claude-sonnet-4-20250514', 'claude-haiku-4-20250514'],
+            openai: ['gpt-5', 'gpt-4o', 'gpt-4o-mini', 'o1-preview', 'o1-mini'],
+            gemini: ['gemini-3-pro-preview', 'gemini-2.5-pro', 'gemini-2.0-flash'],
+            grok: ['grok-3', 'grok-2'],
+            custom: [],
+            ollama: ['qwen3.5:9b', 'qwen2.5:14b', 'llama3:latest', 'gemma4:latest', 'mistral:latest', 'phi4:latest']
+        };
+
+        // 环境变量映射
+        const ENV_VARS = {
+            anthropic: { key: 'ANTHROPIC_API_KEY' },
+            openai: { key: 'OPENAI_API_KEY', baseUrl: 'OPENAI_BASE_URL' },
+            gemini: { key: 'GEMINI_API_KEY', baseUrl: 'GEMINI_BASE_URL' },
+            grok: { key: 'GROK_API_KEY', baseUrl: 'GROK_BASE_URL' },
+            custom: { key: 'CUSTOM_API_KEY', baseUrl: 'CUSTOM_BASE_URL' },
+            ollama: { key: 'OLLAMA_API_KEY', baseUrl: 'OLLAMA_BASE_URL' }
+        };
+
+        // 提供商显示名称
+        const PROVIDER_NAMES = {
+            anthropic: 'Anthropic',
+            openai: 'OpenAI',
+            gemini: 'Gemini',
+            grok: 'Grok',
+            custom: '自定义',
+            ollama: 'Ollama (本地)'
+        };
+
+        let configs = [];
+        let activeConfig = null;
+        let currentModel = null;
+        let deleteConfigName = null;
+        let formModels = [];
+
+        // 初始化
+        async function init() {
+            await loadConfigs();
+            updateStatusBar();
+        }
+
+        // 更新状态栏
+        async function updateStatusBar() {
+            try {
+                const res = await fetch('/api/health');
+                const data = await res.json();
+                document.getElementById('status-text').innerHTML = '<span class="status-dot" style="background: #22c55e;"></span> 服务器正常';
+                document.getElementById('config-path').textContent = data.configPath;
+            } catch (error) {
+                document.getElementById('status-text').innerHTML = '<span class="status-dot" style="background: #ef4444;"></span> 服务器连接失败';
+            }
+        }
+
+        // 加载配置
+        async function loadConfigs() {
+            try {
+                const [configsRes, activeRes] = await Promise.all([
+                    fetch('/api/configs'),
+                    fetch('/api/active')
+                ]);
+                const configsData = await configsRes.json();
+                const activeData = await activeRes.json();
+                
+                configs = configsData.configs || [];
+                activeConfig = activeData.activeConfig;
+                currentModel = activeData.model;
+                
+                renderConfigList();
+                updateJsonPreview();
+            } catch (error) {
+                showToast('加载配置失败: ' + error.message, 'error');
+            }
+        }
+
+        // 渲染配置列表
+        function renderConfigList() {
+            const container = document.getElementById('config-list');
+            
+            if (configs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>暂无配置组</p>
+                        <p style="font-size: 13px; margin-top: 10px; color: #666;">点击右上角"新增配置组"按钮添加</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = configs.map(config => {
+                const isActive = activeConfig === config.name;
+                const models = config.models || [];
+                const activeModel = config.activeModel || (models.length > 0 ? models[0] : null);
+                
+                return `
+                    <div class="config-group ${isActive ? 'active' : ''}">
+                        <div class="config-header">
+                            <div class="config-info">
+                                <div class="config-name">
+                                    ${escapeHtml(config.name)}
+                                    ${isActive ? '<span class="config-badge">✓ 当前激活</span>' : ''}
+                                </div>
+                                <div class="config-meta">
+                                    <span class="provider-tag provider-${config.provider}">${PROVIDER_NAMES[config.provider]}</span>
+                                    ${config.baseUrl ? `<span>→ ${escapeHtml(config.baseUrl)}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="config-actions">
+                                ${!isActive ? `
+                                    <button class="btn btn-success btn-small" onclick="activateConfig('${escapeHtml(config.name)}')">激活</button>
+                                ` : ''}
+                                <button class="btn btn-secondary btn-small" onclick="editConfig('${escapeHtml(config.name)}')">编辑</button>
+                                <button class="btn btn-danger btn-small" onclick="showDeleteModal('${escapeHtml(config.name)}')">删除</button>
+                            </div>
+                        </div>
+                        <div class="models-section">
+                            <div class="models-title">可用模型 (${models.length})</div>
+                            <div class="models-list">
+                                ${models.length === 0 ? '<span style="color: #666; font-size: 13px;">暂无模型，点击编辑添加</span>' : ''}
+                                ${models.map(model => `
+                                    <div class="model-chip ${model === activeModel ? 'current' : ''} ${isActive && model === currentModel ? 'active' : ''}" 
+                                         onclick="switchModel('${escapeHtml(config.name)}', '${escapeHtml(model)}')">
+                                        ${escapeHtml(model)}
+                                        ${isActive && model === currentModel ? ' ✓' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 更新 JSON 预览
+        async function updateJsonPreview() {
+            try {
+                const res = await fetch('/api/settings');
+                const settings = await res.json();
+                document.getElementById('json-output').textContent = JSON.stringify(settings, null, 2);
+            } catch (error) {
+                document.getElementById('json-output').textContent = '加载失败: ' + error.message;
+            }
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+            
+            if (tab === 'json') {
+                updateJsonPreview();
+            }
+        }
+
+        // 打开模态框
+        function openModal(isEdit = false) {
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('modal-title').textContent = isEdit ? '编辑配置组' : '新增配置组';
+            
+            if (!isEdit) {
+                document.getElementById('config-form').reset();
+                document.getElementById('edit-name').value = '';
+                formModels = [];
+                onProviderChange();
+            }
+            
+            renderModelsChip();
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // 提供商变更
+        function onProviderChange() {
+            const provider = document.getElementById('config-provider').value;
+            const env = ENV_VARS[provider];
+            
+            document.getElementById('apikey-hint').textContent = `对应环境变量: ${env.key}`;
+            
+            const baseUrlGroup = document.getElementById('baseurl-group');
+            if (env.baseUrl) {
+                baseUrlGroup.style.display = 'block';
+                document.getElementById('baseurl-hint').textContent = `对应环境变量: ${env.baseUrl}`;
+            } else {
+                baseUrlGroup.style.display = 'none';
+            }
+            
+            // 显示预设模型提示
+            const presetModels = PRESET_MODELS[provider];
+            if (presetModels.length > 0) {
+                document.getElementById('models-hint').textContent = 
+                    `预设模型: ${presetModels.join(', ')}`;
+            } else {
+                document.getElementById('models-hint').textContent = '添加可用的模型名称';
+            }
+        }
+
+        // 添加模型
+        function addModel() {
+            const input = document.getElementById('model-input');
+            const model = input.value.trim();
+            
+            if (model && !formModels.includes(model)) {
+                formModels.push(model);
+                input.value = '';
+                renderModelsChip();
+            }
+        }
+
+        // 渲染模型标签
+        function renderModelsChip() {
+            const container = document.getElementById('models-chip-list');
+            container.innerHTML = formModels.map(model => `
+                <div class="models-input-chip">
+                    ${escapeHtml(model)}
+                    <span class="remove" onclick="removeModel('${escapeHtml(model)}')">&times;</span>
+                </div>
+            `).join('');
+        }
+
+        // 移除模型
+        function removeModel(model) {
+            formModels = formModels.filter(m => m !== model);
+            renderModelsChip();
+        }
+
+        // 保存配置
+        async function saveConfig(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('config-name').value.trim();
+            const provider = document.getElementById('config-provider').value;
+            const apiKey = document.getElementById('config-apikey').value;
+            const baseUrl = document.getElementById('config-baseurl').value.trim();
+            const editName = document.getElementById('edit-name').value;
+            
+            if (!apiKey) {
+                showToast('请输入 API Key', 'error');
+                return;
+            }
+            
+            const config = {
+                name,
+                provider,
+                apiKey,
+                baseUrl: baseUrl || null,
+                models: formModels
+            };
+            
+            try {
+                if (editName) {
+                    // 删除旧配置
+                    await fetch(`/api/configs/${encodeURIComponent(editName)}`, { method: 'DELETE' });
+                }
+                
+                const res = await fetch('/api/configs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                
+                if (res.ok) {
+                    await loadConfigs();
+                    closeModal();
+                    showToast(editName ? '配置已更新' : '配置已创建');
+                } else {
+                    const error = await res.json();
+                    showToast(error.error || '保存失败', 'error');
+                }
+            } catch (error) {
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        // 编辑配置
+        async function editConfig(name) {
+            try {
+                const res = await fetch(`/api/configs/${encodeURIComponent(name)}`);
+                const config = await res.json();
+                
+                document.getElementById('edit-name').value = config.name;
+                document.getElementById('config-name').value = config.name;
+                document.getElementById('config-provider').value = config.provider;
+                document.getElementById('config-apikey').value = config.apiKey;
+                document.getElementById('config-baseurl').value = config.baseUrl || '';
+                
+                formModels = config.models || [];
+                onProviderChange();
+                renderModelsChip();
+                
+                openModal(true);
+            } catch (error) {
+                showToast('加载配置失败: ' + error.message, 'error');
+            }
+        }
+
+        // 激活配置组
+        async function activateConfig(name) {
+            try {
+                const res = await fetch(`/api/configs/${encodeURIComponent(name)}/activate`, {
+                    method: 'POST'
+                });
+                
+                if (res.ok) {
+                    await loadConfigs();
+                    showToast(`已激活配置组: ${name}`);
+                } else {
+                    const error = await res.json();
+                    showToast(error.error || '激活失败', 'error');
+                }
+            } catch (error) {
+                showToast('激活失败: ' + error.message, 'error');
+            }
+        }
+
+        // 切换模型
+        async function switchModel(configName, model) {
+            try {
+                const res = await fetch(`/api/configs/${encodeURIComponent(configName)}/switch-model`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model })
+                });
+                
+                if (res.ok) {
+                    await loadConfigs();
+                    showToast(`已切换到模型: ${model}`);
+                } else {
+                    const error = await res.json();
+                    showToast(error.error || '切换失败', 'error');
+                }
+            } catch (error) {
+                showToast('切换失败: ' + error.message, 'error');
+            }
+        }
+
+        // 显示删除确认
+        function showDeleteModal(name) {
+            deleteConfigName = name;
+            document.getElementById('delete-config-name').textContent = name;
+            document.getElementById('delete-modal').classList.add('show');
+        }
+
+        // 关闭删除确认
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('show');
+            deleteConfigName = null;
+        }
+
+        // 确认删除
+        async function confirmDelete() {
+            if (!deleteConfigName) return;
+            
+            try {
+                const res = await fetch(`/api/configs/${encodeURIComponent(deleteConfigName)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (res.ok) {
+                    await loadConfigs();
+                    closeDeleteModal();
+                    showToast('配置已删除');
+                } else {
+                    const error = await res.json();
+                    showToast(error.error || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('删除失败: ' + error.message, 'error');
+            }
+        }
+
+        // 复制 JSON
+        async function copyJson() {
+            try {
+                const res = await fetch('/api/settings');
+                const settings = await res.json();
+                const json = JSON.stringify(settings, null, 2);
+                
+                await navigator.clipboard.writeText(json);
+                showToast('JSON 已复制到剪贴板');
+            } catch (error) {
+                showToast('复制失败: ' + error.message, 'error');
+            }
+        }
+
+        // 显示提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('delete-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        // 模型输入回车添加
+        document.getElementById('model-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addModel();
+            }
+        });
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
