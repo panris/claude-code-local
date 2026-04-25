@@ -6,64 +6,41 @@
   <title>Claude Code 模型配置</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg: #0f1117;
-      --surface: #161b22;
-      --surface2: #1c2128;
-      --border: rgba(255,255,255,0.08);
-      --text: #e6edf3;
-      --text2: #8b949e;
-      --accent: #58a6ff;
-      --kimi: #7c3aed;
-      --deepseek: #2563eb;
-      --qwen: #db2777;
-      --zhipu: #ea580c;
-      --ark: #dc2626;
-      --openai: #10a37f;
-      --anthropic: #d97706;
-      --ollama: #9333ea;
-      --custom: #6b7280;
-      --danger: #f85149;
-      --success: #3fb950;
+      --bg: #0f1117; --surface: #161b22; --surface2: #1c2128;
+      --border: rgba(255,255,255,0.08); --text: #e6edf3; --text2: #8b949e;
+      --accent: #58a6ff; --danger: #f85149; --success: #3fb950;
+      --kimi: #7c3aed; --deepseek: #2563eb; --qwen: #db2777;
+      --zhipu: #ea580c; --ark: #dc2626; --openai: #10a37f;
+      --anthropic: #d97706; --ollama: #9333ea; --groq: #f59e0b;
+      --gemini: #6b7280; --grok: #6b7280; --custom: #6b7280;
     }
-
     body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
-    .header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .header-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .header-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
     .header-sub { font-size: 12px; color: var(--text2); margin-left: 12px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; flex-shrink: 0; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
 
-    .main { max-width: 860px; margin: 0 auto; padding: 24px; }
+    .main { max-width: 900px; margin: 0 auto; padding: 24px; }
 
-    /* ── 标签页 ─────────────────────────────────────── */
+    /* ── 标签页 ──────────────────────────────── */
     .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--surface); border-radius: 10px; padding: 4px; }
     .tab { flex: 1; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); text-align: center; border: none; background: transparent; transition: all 0.15s; }
     .tab:hover { color: var(--text); }
     .tab.active { background: var(--surface2); color: var(--text); font-weight: 500; }
-
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* ── 工具栏 ─────────────────────────────────────── */
-    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    /* ── 工具栏 ──────────────────────────────── */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .toolbar-left { font-size: 13px; color: var(--text2); }
-    .current-model-badge { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; margin-left: 4px; }
+    .current-model-badge { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; margin-left: 4px; display: none; }
+    .current-model-badge.active { display: inline-block; }
 
-    /* ── 按钮 ───────────────────────────────────────── */
-    .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+    /* ── 按钮 ───────────────────────────────── */
+    .btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { background: #79b8ff; }
     .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
@@ -72,19 +49,11 @@
     .btn-success:hover { background: rgba(63,185,80,0.25); }
     .btn-danger { background: rgba(248,81,73,0.15); color: var(--danger); border: 1px solid rgba(248,81,73,0.3); }
     .btn-danger:hover { background: rgba(248,81,73,0.25); }
-    .btn-xs { padding: 4px 10px; font-size: 11px; border-radius: 6px; }
-    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-xs { padding: 3px 8px; font-size: 11px; border-radius: 6px; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
 
-    /* ── 供应商标签 ─────────────────────────────────── */
-    .provider-tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
+    /* ── 供应商标签 ──────────────────────────── */
+    .provider-tag { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
     .provider-kimi { background: rgba(124,58,237,0.2); color: #a78bfa; }
     .provider-deepseek { background: rgba(37,99,235,0.2); color: #60a5fa; }
     .provider-qwen { background: rgba(219,39,119,0.2); color: #f472b6; }
@@ -93,172 +62,71 @@
     .provider-openai { background: rgba(16,163,127,0.2); color: #34d399; }
     .provider-anthropic { background: rgba(217,119,6,0.2); color: #fbbf24; }
     .provider-ollama { background: rgba(147,51,234,0.2); color: #c084fc; }
+    .provider-groq { background: rgba(245,158,11,0.2); color: #fbbf24; }
     .provider-gemini, .provider-grok, .provider-custom { background: rgba(107,114,128,0.2); color: #9ca3af; }
 
-    /* ── 配置组卡片 ─────────────────────────────────── */
-    .config-list { display: flex; flex-direction: column; gap: 16px; }
-
+    /* ── 配置组卡片 ──────────────────────────── */
+    .config-list { display: flex; flex-direction: column; gap: 14px; }
     .config-group { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s; }
-    .config-group.active { border-color: var(--success); }
-    .config-group.active > .config-head { border-bottom-color: rgba(63,185,80,0.15); }
-
-    .config-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .config-group.active { border-color: rgba(63,185,80,0.4); }
+    .config-head { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .config-head-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-    .config-name { font-size: 15px; font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace; }
-    .config-name-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
-    .active-badge { background: rgba(63,185,80,0.2); color: var(--success); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-    .config-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+    .config-name { font-size: 14px; font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace; }
+    .active-badge { background: rgba(63,185,80,0.2); color: var(--success); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    .config-actions { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
+    .config-body { padding: 10px 16px; }
 
-    .config-body { padding: 12px 18px; }
-
-    /* ── 模型列表 ───────────────────────────────────── */
-    .models-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; min-height: 32px; }
-    .model-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 12px;
-      font-family: 'SF Mono', monospace;
-      cursor: pointer;
-      transition: all 0.15s;
-      user-select: none;
-    }
+    /* ── 模型列表 ────────────────────────────── */
+    .models-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; min-height: 30px; }
+    .model-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; cursor: pointer; transition: all 0.15s; user-select: none; }
     .model-chip:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
     .model-chip.current { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.1); }
-    .model-chip.active { border-color: var(--success); color: var(--success); background: rgba(63,185,80,0.1); }
-    .model-chip .remove-model {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: rgba(248,81,73,0.2);
-      color: var(--danger);
-      font-size: 10px;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.15s;
-      margin-left: 2px;
-      border: none;
-      padding: 0;
-    }
+    .model-chip .remove-model { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; background: rgba(248,81,73,0.2); color: var(--danger); font-size: 10px; cursor: pointer; opacity: 0; transition: opacity 0.15s; margin-left: 2px; border: none; padding: 0; line-height: 1; }
     .model-chip:hover .remove-model { opacity: 1; }
     .model-chip .remove-model:hover { background: var(--danger); color: #fff; }
 
-    /* ── 添加模型行 ─────────────────────────────────── */
+    /* ── 添加模型行 ──────────────────────────── */
     .add-model-row { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-    .add-model-row input {
-      flex: 1;
-      padding: 6px 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--text);
-      font-size: 12px;
-      font-family: 'SF Mono', monospace;
-      outline: none;
-    }
+    .add-model-row input { flex: 1; padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 12px; font-family: 'SF Mono', monospace; outline: none; }
     .add-model-row input:focus { border-color: var(--accent); }
     .add-model-row input::placeholder { color: var(--text2); }
 
-    /* ── 空状态 ─────────────────────────────────────── */
+    /* ── 空状态 ──────────────────────────────── */
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); }
-    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
     .empty-state p { font-size: 14px; }
     .empty-state p + p { margin-top: 6px; font-size: 12px; color: #555; }
 
-    /* ── Toast ──────────────────────────────────────── */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 13px;
-      z-index: 9999;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-      white-space: nowrap;
-      max-width: 90vw;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    /* ── Toast ──────────────────────────────── */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px; font-size: 13px; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.3s; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
     .toast.show { opacity: 1; }
     .toast.error { border-color: var(--danger); color: var(--danger); }
     .toast.success { border-color: var(--success); color: var(--success); }
 
-    /* ── 模态框 ─────────────────────────────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-    }
+    /* ── 模态框 ──────────────────────────────── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
     .modal-overlay.show { display: flex; }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-    }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 24px; }
     .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
-
     .form-row { margin-bottom: 16px; }
     .form-label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
     .form-label span { color: var(--text); font-weight: 600; }
     .form-hint { font-size: 11px; color: #555; margin-top: 4px; }
-
-    .form-input, .form-select {
-      width: 100%;
-      padding: 9px 12px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
+    .form-input, .form-select { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.15s; }
     .form-input:focus, .form-select:focus { border-color: var(--accent); }
     .form-select { cursor: pointer; }
-
-    textarea.form-input { resize: vertical; min-height: 70px; font-family: inherit; line-height: 1.5; }
-
     .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
 
-    /* ── JSON 视图 ───────────────────────────────────── */
-    #json-tab pre {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 12px;
-      line-height: 1.6;
-      overflow-x: auto;
-      color: var(--text2);
-      white-space: pre;
-    }
+    /* ── JSON 视图 ──────────────────────────── */
+    #json-tab pre { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; font-size: 12px; line-height: 1.6; overflow-x: auto; color: var(--text2); white-space: pre; }
 
-    /* ── 删除确认框 ──────────────────────────────────── */
+    /* ── 删除确认框 ──────────────────────────── */
     .confirm-text { font-size: 14px; color: var(--text2); margin-bottom: 16px; line-height: 1.6; }
     .confirm-text strong { color: var(--text); }
+
+    /* ── 说明提示 ────────────────────────────── */
+    .info-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--text2); line-height: 1.6; }
+    .info-box strong { color: var(--text); }
+    .info-box a { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -269,10 +137,17 @@
     Claude Code 模型配置
     <span class="header-sub" id="current-model"></span>
   </div>
-  <button class="btn btn-primary" onclick="openNewGroupModal()">+ 新建配置组</button>
+  <div class="header-right">
+    <button class="btn btn-primary" onclick="openNewGroupModal()">+ 新建配置组</button>
+  </div>
 </div>
 
 <div class="main">
+  <div class="info-box">
+    <strong>使用说明：</strong>先在下方「配置列表」添加模型（选提供商 → 填 API Key → 保存），再点「激活」。然后运行 <code>./start.sh</code> 启动 Claude Code。
+    · <strong>免费推荐：</strong>Groq（完全免费，无需充值）> <a href="https://console.groq.com" target="_blank">console.groq.com</a> 注册获取 Key
+  </div>
+
   <!-- 标签页 -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('list', this)">配置列表</button>
@@ -284,7 +159,7 @@
     <div class="toolbar">
       <div class="toolbar-left">
         共 <strong id="group-count">0</strong> 个配置组
-        <span class="current-model-badge" id="active-model-badge" style="display:none">未激活</span>
+        <span class="current-model-badge" id="active-model-badge">未激活</span>
       </div>
     </div>
     <div class="config-list" id="config-list"></div>
@@ -301,11 +176,6 @@
   <div class="modal">
     <div class="modal-title" id="modal-title">新建配置组</div>
 
-    <div class="form-row" id="edit-group-id-row" style="display:none">
-      <label class="form-label">组 ID</label>
-      <input class="form-input" id="edit-group-id" readonly style="opacity:0.5;font-size:12px">
-    </div>
-
     <div class="form-row">
       <label class="form-label">配置组名称 <span>*</span></label>
       <input class="form-input" id="group-name" placeholder="例如：Kimi 生产环境">
@@ -316,6 +186,7 @@
       <label class="form-label">选择提供商 <span>*</span></label>
       <select class="form-select" id="group-provider" onchange="onProviderChange()">
         <option value="">-- 选择 --</option>
+        <option value="groq">🔥 Groq（完全免费，推荐）</option>
         <option value="kimi">Kimi（月之暗面）</option>
         <option value="deepseek">DeepSeek</option>
         <option value="qwen">通义千问（阿里云）</option>
@@ -333,7 +204,7 @@
       <input class="form-input" id="group-apikey" placeholder="sk-xxxxxxxxxxxxxxxx" type="password">
     </div>
 
-    <div class="form-row" id="baseurl-row">
+    <div class="form-row">
       <label class="form-label">接口地址</label>
       <input class="form-input" id="group-baseurl" placeholder="选完提供商后自动填充，可修改">
       <div class="form-hint" id="baseurl-hint">选完提供商后自动填写，通常不需要改</div>
@@ -359,7 +230,7 @@
     <div class="confirm-text" id="delete-confirm-text"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
-      <button class="btn btn-danger" id="confirm-delete-btn" onclick="confirmDelete()">删除</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">删除</button>
     </div>
   </div>
 </div>
@@ -371,119 +242,146 @@
 'use strict';
 
 // ── 状态 ──────────────────────────────────────────────────
-let groups = [];
-let activeGroupId = null;
-let activeModel = null;
-let editingGroupId = null;
-let deleteTarget = null;
+let groups    = [];
+let activeId  = null;
+let editingId = null;  // null = 新建，非 null = 编辑
+let deletingId = null;
 
-// ── 工具函数 ──────────────────────────────────────────────
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + type + ' show';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+// ── 提供商元数据 ───────────────────────────────────────────
+const PROVIDER_NAMES = {
+  groq: 'Groq', kimi: 'Kimi', deepseek: 'DeepSeek', qwen: '通义千问',
+  zhipu: '智谱 GLM', ark: '火山引擎 ARK', openai: 'OpenAI',
+  anthropic: 'Anthropic', ollama: 'Ollama', gemini: 'Gemini',
+  grok: 'Grok', custom: '自定义'
+};
+
+const BASE_URL_HINTS = {
+  groq:      'https://api.groq.com/openai/v1',
+  kimi:      'https://api.moonshot.cn/v1',
+  deepseek:  'https://api.deepseek.com',
+  qwen:      'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  zhipu:     'https://open.bigmodel.cn/api/paas/v4',
+  ark:       'https://ark.cn-beijing.volces.com/api/v3',
+  openai:    'https://api.openai.com/v1',
+  anthropic: 'https://api.anthropic.com/v1',
+  ollama:    'http://localhost:11434',
+  custom:    ''
+};
+
+const PRESET_MODELS = {
+  groq:      ['llama-3.1-8b-instant', 'llama-3.2-1b-preview', 'llama-3.2-3b-preview', 'mixtral-8x7b-32768'],
+  kimi:      ['kimi-k2.6', 'moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'],
+  deepseek:  ['deepseek-chat', 'deepseek-reasoner', 'deepseek-coder'],
+  qwen:      ['qwen-plus', 'qwen-turbo', 'qwen-max'],
+  zhipu:     ['glm-4-plus', 'glm-4-air'],
+  ark:       [],
+  openai:    ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'],
+  anthropic: ['claude-sonnet-4-20250514', 'claude-opus-4-6'],
+  ollama:    ['llama3', 'qwen2.5', 'gemma2'],
+  custom:    []
+};
+
+// ── 工具函数 ───────────────────────────────────────────────
+function showToast(msg, type) {
+  type = type || 'success';
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type + ' show';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.className = 'toast'; }, 2800);
 }
 
 function escapeHtml(text) {
-  const d = document.createElement('div');
-  d.textContent = text;
-  return d.innerHTML;
+  if (!text) return '';
+  return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── 加载数据 ──────────────────────────────────────────────
+// ── 加载 ───────────────────────────────────────────────────
 async function loadData() {
   try {
     const r = await fetch('/api/configs');
+    if (!r.ok) throw new Error('加载失败');
     const d = await r.json();
-    groups = d.configs || [];
-    activeGroupId = d.activeGroupId;
-    activeModel = d.activeModel;
+    groups   = d.configs || [];
+    activeId = d.activeGroupId;
     renderGroups();
     updateStatusBar();
-    updateJsonView();
   } catch (e) {
     showToast('加载配置失败: ' + e.message, 'error');
   }
 }
 
 function updateStatusBar() {
-  document.getElementById('group-count').textContent = groups.length;
+  const el = document.getElementById('current-model');
   const badge = document.getElementById('active-model-badge');
-  if (activeGroupId && activeModel) {
-    const g = groups.find(x => x.id === activeGroupId);
-    if (g) {
-      badge.textContent = g.name + ' / ' + activeModel;
-      badge.style.display = 'inline-block';
-      document.getElementById('current-model').textContent = g.name + ' › ' + activeModel;
-    }
+  const count = document.getElementById('group-count');
+  count.textContent = groups.length;
+
+  const active = groups.find(g => g.id === activeId);
+  if (active) {
+    const model = active.activeModel || (active.models && active.models[0]) || '';
+    el.textContent = '· ' + model;
+    badge.textContent = '✓ ' + (PROVIDER_NAMES[active.provider] || active.provider);
+    badge.className = 'current-model-badge active';
   } else {
+    el.textContent = '';
     badge.textContent = '未激活';
-    badge.style.display = 'inline-block';
-    document.getElementById('current-model').textContent = '未选择模型';
+    badge.className = 'current-model-badge';
   }
 }
 
-// ── 渲染 ──────────────────────────────────────────────────
+// ── 渲染 ───────────────────────────────────────────────────
 function renderGroups() {
-  const c = document.getElementById('config-list');
+  const el = document.getElementById('config-list');
   if (groups.length === 0) {
-    c.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">📝</div>
-        <p>还没有配置组</p>
-        <p>点击右上角「新建配置组」添加你的第一个配置</p>
-      </div>`;
+    el.innerHTML = '<div class="empty-state"><p>还没有配置组</p><p>点击右上角「新建配置组」添加第一个模型</p></div>';
     return;
   }
-  c.innerHTML = groups.map(g => {
-    const isActive = g.id === activeGroupId;
-    return `
-      <div class="config-group${isActive ? ' active' : ''}">
-        <div class="config-head">
-          <div class="config-head-left">
-            <div>
-              <div class="config-name">${escapeHtml(g.name)}</div>
-              <div class="config-name-desc">
-                <span class="provider-tag provider-${g.provider}">${PROVIDER_NAMES[g.provider] || g.provider}</span>
-                ${isActive ? '<span class="active-badge">✓ 当前激活</span>' : ''}
-              </div>
-            </div>
-          </div>
-          <div class="config-actions">
-            ${!isActive ? `<button class="btn btn-success btn-xs" onclick="activateGroup('${g.id}')">激活</button>` : ''}
-            <button class="btn btn-secondary btn-xs" onclick="openEditModal('${g.id}')">编辑</button>
-            <button class="btn btn-danger btn-xs" onclick="openDeleteModal('${g.id}')">删除</button>
-          </div>
-        </div>
-        <div class="config-body">
-          <div class="models-grid">
-            ${g.models.map(m => `
-              <div class="model-chip${m === g.activeModel ? ' current' : ''}${isActive && m === activeModel ? ' active' : ''}"
-                   onclick="activateModel('${g.id}', '${escapeHtml(m)}')">
-                ${escapeHtml(m)}
-                ${isActive && m === activeModel ? ' ✓' : ''}
-                <button class="remove-model" onclick="event.stopPropagation(); removeModel('${g.id}', '${escapeHtml(m)}')" title="移除此模型">×</button>
-              </div>
-            `).join('')}
-          </div>
-          <div class="add-model-row">
-            <input id="add-model-${g.id}" placeholder="输入模型名称，回车添加"
-                   onkeydown="if(event.key==='Enter'){event.preventDefault();addModel('${g.id}')}">
-            <button class="btn btn-secondary btn-xs" onclick="addModel('${g.id}')">+ 添加</button>
-          </div>
-        </div>
-      </div>`;
+
+  // 按提供商分组排序
+  const PROVIDER_ORDER = ['groq','kimi','deepseek','qwen','zhipu','ark','openai','anthropic','ollama','gemini','grok','custom'];
+  const sorted = [...groups].sort((a, b) => {
+    const ai = PROVIDER_ORDER.indexOf(a.provider);
+    const bi = PROVIDER_ORDER.indexOf(b.provider);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+
+  el.innerHTML = sorted.map(g => {
+    const isActive = g.id === activeId;
+    const providerTag = PROVIDER_NAMES[g.provider] || g.provider;
+    const modelsHtml = (g.models || []).map(m => {
+      const isCurrent = m === g.activeModel;
+      return `<span class="model-chip${isCurrent ? ' current' : ''}" onclick="activateModel('${g.id}','${escapeHtml(m)}')" title="点击激活此模型">
+        ${escapeHtml(m)}
+        <button class="remove-model" onclick="event.stopPropagation();removeModel('${g.id}','${escapeHtml(m)}')" title="删除此模型">✕</button>
+      </span>`;
+    }).join('');
+
+    return `<div class="config-group${isActive ? ' active' : ''}">
+  <div class="config-head">
+    <div class="config-head-left">
+      <span class="provider-tag provider-${g.provider}">${providerTag}</span>
+      <span class="config-name">${escapeHtml(g.name)}</span>
+      ${isActive ? '<span class="active-badge">当前</span>' : ''}
+    </div>
+    <div class="config-actions">
+      <button class="btn btn-success btn-xs" onclick="activateGroup('${g.id}')">激活</button>
+      <button class="btn btn-secondary btn-xs" onclick="addModelPrompt('${g.id}')">+模型</button>
+      <button class="btn btn-secondary btn-xs" onclick="openEditModal('${g.id}')">编辑</button>
+      <button class="btn btn-danger btn-xs" onclick="openDeleteModal('${g.id}')">删除</button>
+    </div>
+  </div>
+  <div class="config-body">
+    <div class="models-grid">${modelsHtml || '<span style="font-size:12px;color:var(--text2)">暂无模型</span>'}</div>
+  </div>
+</div>`;
   }).join('');
 }
 
-// ── 新建 / 编辑 ───────────────────────────────────────────
+// ── 新建 / 编辑 ─────────────────────────────────────────────
 function openNewGroupModal() {
-  editingGroupId = null;
+  editingId = null;
   document.getElementById('modal-title').textContent = '新建配置组';
-  document.getElementById('modal-save-btn').textContent = '创建';
-  document.getElementById('edit-group-id-row').style.display = 'none';
   document.getElementById('group-name').value = '';
   document.getElementById('group-provider').value = '';
   document.getElementById('group-apikey').value = '';
@@ -497,80 +395,54 @@ function openNewGroupModal() {
 function openEditModal(id) {
   const g = groups.find(x => x.id === id);
   if (!g) return;
-  editingGroupId = id;
+  editingId = id;
   document.getElementById('modal-title').textContent = '编辑配置组';
-  document.getElementById('modal-save-btn').textContent = '保存修改';
-  document.getElementById('edit-group-id-row').style.display = 'block';
-  document.getElementById('edit-group-id').value = g.id;
-  document.getElementById('group-name').value = g.name;
-  document.getElementById('group-provider').value = g.provider;
-  document.getElementById('group-apikey').value = g.apiKey;
-  document.getElementById('group-baseurl').value = g.baseUrl;
-  document.getElementById('group-models').value = g.models.join(', ');
-  document.getElementById('baseurl-hint').textContent = g.baseUrl;
+  document.getElementById('group-name').value = g.name || '';
+  document.getElementById('group-provider').value = g.provider || '';
+  document.getElementById('group-apikey').value = g.apiKey || '';
+  document.getElementById('group-baseurl').value = g.baseUrl || '';
+  document.getElementById('group-models').value = (g.models || []).join(', ');
+  onProviderChange();
   document.getElementById('modal').classList.add('show');
 }
 
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
-  editingGroupId = null;
+  editingId = null;
 }
 
 function onProviderChange() {
   const p = document.getElementById('group-provider').value;
-  const hints = {
-    kimi: 'https://api.moonshot.cn/v1',
-    deepseek: 'https://api.deepseek.com/v1',
-    qwen: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    zhipu: 'https://open.bigmodel.cn/api/paas/v4',
-    ark: 'https://ark.cn-beijing.volces.com/api/v3',
-    openai: 'https://api.openai.com/v1',
-    anthropic: 'https://api.anthropic.com/v1',
-    ollama: 'http://localhost:11434',
-    custom: ''
-  };
-  if (hints[p]) {
-    document.getElementById('group-baseurl').value = hints[p];
-    document.getElementById('baseurl-hint').textContent = hints[p];
-  } else {
-    document.getElementById('group-baseurl').value = '';
-    document.getElementById('baseurl-hint').textContent = '选完提供商后自动填写，通常不需要改';
+  const hint = BASE_URL_HINTS[p] || '';
+  document.getElementById('group-baseurl').value = hint;
+  document.getElementById('baseurl-hint').textContent = hint ? hint + '（通常不需要改）' : '选完提供商后自动填写，通常不需要改';
+  if (!editingId && PRESET_MODELS[p] && PRESET_MODELS[p].length > 0) {
+    document.getElementById('group-models').value = PRESET_MODELS[p][0];
   }
 }
 
 async function saveGroup() {
-  const name = document.getElementById('group-name').value.trim();
+  const name     = document.getElementById('group-name').value.trim();
   const provider = document.getElementById('group-provider').value;
-  const apiKey = document.getElementById('group-apikey').value.trim();
-  const baseUrl = document.getElementById('group-baseurl').value.trim();
-  const models = document.getElementById('group-models').value.trim();
+  const apiKey   = document.getElementById('group-apikey').value.trim();
+  const baseUrl  = document.getElementById('group-baseurl').value.trim();
+  const models   = document.getElementById('group-models').value.trim();
 
-  if (!name) { showToast('请填写配置组名称', 'error'); return; }
-  if (!provider) { showToast('请选择提供商', 'error'); return; }
-  if (!apiKey) { showToast('请填写 API Key', 'error'); return; }
-  if (!models) { showToast('请至少填写一个模型名称', 'error'); return; }
+  if (!name)     { showToast('请填写配置组名称', 'error'); return; }
+  if (!provider)  { showToast('请选择提供商', 'error'); return; }
+  if (!apiKey)   { showToast('请填写 API Key', 'error'); return; }
+  if (!models)   { showToast('请至少填写一个模型名称', 'error'); return; }
 
   const payload = { name, provider, apiKey, baseUrl, models };
-
-  let url = '/api/configs';
-  let method = 'POST';
-  let successMsg = '配置组创建成功';
-
-  if (editingGroupId) {
-    url = '/api/configs/' + editingGroupId;
-    method = 'PUT';
-    successMsg = '配置组已更新';
-  }
+  const isEdit  = !!editingId;
+  const url      = isEdit ? '/api/configs/' + editingId : '/api/configs';
+  const method   = isEdit ? 'PUT' : 'POST';
 
   try {
-    const r = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const d = await r.json();
+    const r  = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const d  = await r.json();
     if (!r.ok) { showToast(d.error || '操作失败', 'error'); return; }
-    showToast(successMsg);
+    showToast(isEdit ? '配置组已更新' : '配置组创建成功');
     closeModal();
     await loadData();
   } catch (e) {
@@ -578,17 +450,14 @@ async function saveGroup() {
   }
 }
 
-// ── 激活 ──────────────────────────────────────────────────
+// ── 激活 ───────────────────────────────────────────────────
 async function activateGroup(id) {
   try {
     const r = await fetch('/api/configs/' + id + '/activate', { method: 'POST' });
     const d = await r.json();
     if (!r.ok) { showToast(d.error || '激活失败', 'error'); return; }
-    activeGroupId = d.activeGroupId;
-    activeModel = d.activeModel;
-    renderGroups();
-    updateStatusBar();
-    showToast('已激活 ' + (groups.find(x=>x.id===id)?.name || ''));
+    showToast('已激活: ' + (d.groupName || ''));
+    await loadData(); // 重新拉取全量数据，确保 UI 显示最新状态
   } catch (e) { showToast('激活失败: ' + e.message, 'error'); }
 }
 
@@ -597,61 +466,60 @@ async function activateModel(groupId, model) {
     const r = await fetch('/api/configs/' + groupId + '/models/' + encodeURIComponent(model) + '/activate', { method: 'POST' });
     const d = await r.json();
     if (!r.ok) { showToast(d.error || '切换失败', 'error'); return; }
-    activeGroupId = d.activeGroupId;
-    activeModel = d.activeModel;
-    renderGroups();
-    updateStatusBar();
+    showToast('已切换: ' + model);
+    await loadData(); // 重新拉取全量数据，确保 UI 显示最新激活状态
   } catch (e) { showToast('切换失败: ' + e.message, 'error'); }
 }
 
-// ── 添加 / 删除模型 ───────────────────────────────────────
-async function addModel(groupId) {
-  const input = document.getElementById('add-model-' + groupId);
-  const name = input.value.trim();
-  if (!name) return;
+// ── 添加模型 ───────────────────────────────────────────────
+function addModelPrompt(groupId) {
+  const model = prompt('请输入要添加的模型名称：');
+  if (!model || !model.trim()) return;
+  addModelDo(groupId, model.trim());
+}
+
+async function addModelDo(groupId, model) {
   try {
     const r = await fetch('/api/configs/' + groupId + '/models', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ models: name })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ models: model })
     });
     const d = await r.json();
     if (!r.ok) { showToast(d.error || '添加失败', 'error'); return; }
-    input.value = '';
+    showToast('已添加: ' + model);
     await loadData();
-    showToast('已添加: ' + name);
   } catch (e) { showToast('添加失败: ' + e.message, 'error'); }
 }
 
 async function removeModel(groupId, model) {
+  if (!confirm('确定从配置组中移除模型「' + model + '」？\n如需彻底删除，请编辑配置组。')) return;
   try {
     const r = await fetch('/api/configs/' + groupId + '/models/' + encodeURIComponent(model), { method: 'DELETE' });
     const d = await r.json();
     if (!r.ok) { showToast(d.error || '删除失败', 'error'); return; }
     await loadData();
-    showToast('已移除: ' + model);
   } catch (e) { showToast('删除失败: ' + e.message, 'error'); }
 }
 
-// ── 删除 ──────────────────────────────────────────────────
+// ── 删除 ───────────────────────────────────────────────────
 function openDeleteModal(id) {
   const g = groups.find(x => x.id === id);
   if (!g) return;
-  deleteTarget = id;
+  deletingId = id;
   document.getElementById('delete-confirm-text').innerHTML =
-    `确定要删除配置组 <strong>${escapeHtml(g.name)}</strong> 吗？<br>包含 ${g.models.length} 个模型：${g.models.map(m=>escapeHtml(m)).join('、')}`;
+    '确定要删除配置组 <strong>' + escapeHtml(g.name) + '</strong> 吗？<br>该操作不可恢复。';
   document.getElementById('delete-modal').classList.add('show');
 }
 
 function closeDeleteModal() {
   document.getElementById('delete-modal').classList.remove('show');
-  deleteTarget = null;
+  deletingId = null;
 }
 
 async function confirmDelete() {
-  if (!deleteTarget) return;
+  if (!deletingId) return;
   try {
-    const r = await fetch('/api/configs/' + deleteTarget, { method: 'DELETE' });
+    const r = await fetch('/api/configs/' + deletingId, { method: 'DELETE' });
     const d = await r.json();
     if (!r.ok) { showToast(d.error || '删除失败', 'error'); return; }
     showToast('已删除');
@@ -660,32 +528,31 @@ async function confirmDelete() {
   } catch (e) { showToast('删除失败: ' + e.message, 'error'); }
 }
 
-// ── 标签页 ────────────────────────────────────────────────
+// ── 标签页 ─────────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById(tab + '-tab').classList.add('active');
   if (btn) btn.classList.add('active');
+  document.getElementById(tab + '-tab').classList.add('active');
   if (tab === 'json') updateJsonView();
 }
 
 async function updateJsonView() {
   try {
-    const r = await fetch('/api/configs');
-    const d = await r.json();
-    document.getElementById('json-output').textContent = JSON.stringify(d, null, 2);
-  } catch { document.getElementById('json-output').textContent = '加载失败'; }
+    const [r1, r2] = await Promise.all([
+      fetch('/api/configs'),
+      fetch('/api/settings')
+    ]);
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+    document.getElementById('json-output').textContent =
+      '=== config-groups.json ===\n' + JSON.stringify(d1, null, 2) +
+      '\n\n=== litellm_config.yaml ===\n' + (d2.yaml || '');
+  } catch (e) {
+    document.getElementById('json-output').textContent = '加载失败: ' + e.message;
+  }
 }
 
-// ── 提供商名称映射 ────────────────────────────────────────
-const PROVIDER_NAMES = {
-  kimi: 'Kimi', deepseek: 'DeepSeek', qwen: '通义千问',
-  zhipu: '智谱 GLM', ark: '火山引擎 ARK', openai: 'OpenAI',
-  anthropic: 'Anthropic', ollama: 'Ollama', gemini: 'Gemini',
-  grok: 'Grok', custom: '自定义'
-};
-
-// ── 启动 ──────────────────────────────────────────────────
+// ── 启动 ───────────────────────────────────────────────────
 loadData();
 </script>
 </body>
