@@ -30,11 +30,15 @@ __pycache__/
 *.pyc
 logs
 
+# Claude Code Model Config Server
+model-config-server/node_modules/
+model-config-server/package-lock.json
+
 # Upstream dev artifacts
 V6.md
 DEV-LOG.md
 knip.json
 
-# Lock files
-bun.lock
-package-lock.json
+# Claude Code artifacts (no need to track)
+nohup.out
+*.tmp
