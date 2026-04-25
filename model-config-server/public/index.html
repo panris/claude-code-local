@@ -127,6 +127,20 @@
     .info-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--text2); line-height: 1.6; }
     .info-box strong { color: var(--text); }
     .info-box a { color: var(--accent); }
+
+    /* ── 首次使用引导 ──────────────────────────── */
+    .onboarding { text-align: center; padding: 48px 24px; }
+    .onboarding-icon { font-size: 48px; margin-bottom: 16px; }
+    .onboarding h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .onboarding p { color: var(--text2); font-size: 14px; margin-bottom: 32px; }
+    .onboarding-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .onboarding-btn { padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+    .onboarding-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .onboarding-btn.free { background: var(--groq); color: #fff; }
+    .onboarding-btn.kimi { background: var(--kimi); color: #fff; }
+    .onboarding-btn.manual { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .onboarding-note { margin-top: 20px; font-size: 12px; color: #555; }
+    .onboarding-note a { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -144,8 +158,8 @@
 
 <div class="main">
   <div class="info-box">
-    <strong>使用说明：</strong>先在下方「配置列表」添加模型（选提供商 → 填 API Key → 保存），再点「激活」。然后运行 <code>./start.sh</code> 启动 Claude Code。
-    · <strong>免费推荐：</strong>Groq（完全免费，无需充值）> <a href="https://console.groq.com" target="_blank">console.groq.com</a> 注册获取 Key
+    <strong>💡 提示：</strong>添加并激活模型后，直接运行 <code>./start.sh</code> 即可启动 Claude Code。
+    切换模型：在此页面修改配置 → 点「激活」即可，立即生效。
   </div>
 
   <!-- 标签页 -->
@@ -246,6 +260,7 @@ let groups    = [];
 let activeId  = null;
 let editingId = null;  // null = 新建，非 null = 编辑
 let deletingId = null;
+let firstTime  = false;  // 首次使用标记
 
 // ── 提供商元数据 ───────────────────────────────────────────
 const PROVIDER_NAMES = {
@@ -302,10 +317,15 @@ async function loadData() {
     const r = await fetch('/api/configs');
     if (!r.ok) throw new Error('加载失败');
     const d = await r.json();
+    const wasEmpty = groups.length === 0;
     groups   = d.configs || [];
     activeId = d.activeGroupId;
     renderGroups();
     updateStatusBar();
+    // 首次使用：自动弹出引导
+    if (wasEmpty && groups.length === 0) {
+      setTimeout(() => openNewGroupModal(), 400);
+    }
   } catch (e) {
     showToast('加载配置失败: ' + e.message, 'error');
   }
@@ -334,7 +354,22 @@ function updateStatusBar() {
 function renderGroups() {
   const el = document.getElementById('config-list');
   if (groups.length === 0) {
-    el.innerHTML = '<div class="empty-state"><p>还没有配置组</p><p>点击右上角「新建配置组」添加第一个模型</p></div>';
+    // 首次使用引导界面
+    el.innerHTML = `
+<div class="onboarding">
+  <div class="onboarding-icon">🚀</div>
+  <h2>开始使用 Claude Code</h2>
+  <p>先添加一个模型配置，以后随时可以换</p>
+  <div class="onboarding-actions">
+    <button class="onboarding-btn free" onclick="openNewGroupModal('groq')">🔥 免费使用（Groq）</button>
+    <button class="onboarding-btn kimi" onclick="openNewGroupModal('kimi')">🌙 使用 Kimi</button>
+    <button class="onboarding-btn manual" onclick="openNewGroupModal()">📝 其他模型</button>
+  </div>
+  <div class="onboarding-note">
+    没有 API Key？<a href="https://console.groq.com" target="_blank">点击此处注册 Groq（完全免费）</a><br>
+    或访问 <a href="https://platform.moonshot.cn" target="_blank">Kimi</a> · <a href="https://platform.deepseek.com" target="_blank">DeepSeek</a> · <a href="https://dashscope.console.aliyun.com" target="_blank">通义千问</a>
+  </div>
+</div>`;
     return;
   }
 
@@ -379,15 +414,20 @@ function renderGroups() {
 }
 
 // ── 新建 / 编辑 ─────────────────────────────────────────────
-function openNewGroupModal() {
+function openNewGroupModal(presetProvider) {
   editingId = null;
   document.getElementById('modal-title').textContent = '新建配置组';
   document.getElementById('group-name').value = '';
-  document.getElementById('group-provider').value = '';
+  if (presetProvider) {
+    document.getElementById('group-provider').value = presetProvider;
+    onProviderChange();
+  } else {
+    document.getElementById('group-provider').value = '';
+    document.getElementById('group-baseurl').value = '';
+    document.getElementById('group-models').value = '';
+    document.getElementById('baseurl-hint').textContent = '选完提供商后自动填写，通常不需要改';
+  }
   document.getElementById('group-apikey').value = '';
-  document.getElementById('group-baseurl').value = '';
-  document.getElementById('group-models').value = '';
-  document.getElementById('baseurl-hint').textContent = '选完提供商后自动填写，通常不需要改';
   document.getElementById('modal').classList.add('show');
   document.getElementById('group-name').focus();
 }

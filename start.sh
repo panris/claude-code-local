@@ -124,6 +124,33 @@ if [ -f "$HOME_DIR/.env" ]; then
     fi
 fi
 
+# ── 首次使用提示 ───────────────────────────────────────────────
+if curl -sf "http://localhost:$CONFIG_PORT/api/status" 2>/dev/null | grep -q '"configured":true'; then
+    FIRST_TIME=0
+else
+    FIRST_TIME=1
+fi
+
+if [ "$FIRST_TIME" = 1 ]; then
+    echo ""
+    warn "首次使用！请按以下步骤操作："
+    echo ""
+    echo "  1. 浏览器已自动打开 http://localhost:$CONFIG_PORT"
+    echo "  2. 点击 [新建配置组] 添加你的 API Key"
+    echo "  3. 选择服务商（推荐 [🔥 Groq] 完全免费），填入 Key"
+    echo "  4. 点 [保存]，然后点 [激活]"
+    echo "  5. 完成后回来按 Enter 启动 Claude Code"
+    echo ""
+    echo "  没有 API Key？→ https://console.groq.com （免费）"
+    echo ""
+    # 自动打开浏览器
+    if command -v open >/dev/null 2>&1; then
+        open "http://localhost:$CONFIG_PORT"
+    fi
+    printf '%s' "按 Enter 继续... "
+    read _
+fi
+
 echo ""
 
 # ── 启动 Claude Code ───────────────────────────────────────────

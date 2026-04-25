@@ -34,6 +34,13 @@ logs
 model-config-server/node_modules/
 model-config-server/package-lock.json
 
+# 部署包目录（给同事直接使用）
+deploy/
+!deploy/start-mac.command
+!deploy/README.md
+!deploy/启动服务.bat
+!deploy/安装依赖.bat
+
 # Upstream dev artifacts
 V6.md
 DEV-LOG.md
