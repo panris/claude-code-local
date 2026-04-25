@@ -123,7 +123,7 @@ function handleMessages(req, res, body) {
     return;
   }
 
-  const configModel   = config.OPENAI_MODEL || config.OLLAMA_MODEL || '';
+  const configModel   = config.OPENAI_MODEL || config.CLAUDE_MODEL || config.OLLAMA_MODEL || '';
   const model        = mapModel(parsed.model, configModel);
   const maxTokens    = parsed.max_tokens || 4096;
   const temperature  = parsed.temperature;
@@ -134,7 +134,6 @@ function handleMessages(req, res, body) {
 
   const baseUrl = config.OPENAI_BASE_URL || config.OLLAMA_BASE_URL || 'http://localhost:11434';
 
-  console.log('\n[POST /v1/messages]  model=' + model + '  base=' + baseUrl + '  system=' + (systemPrompt ? 'yes' : 'no'));
 
   if (isOllamaUrl(baseUrl)) {
     const ollamaMessages = anthropicToOllama(messages, systemPrompt);
@@ -212,7 +211,6 @@ function handleMessages(req, res, body) {
 
     const client = forwardUrl.protocol === 'https:' ? https : http;
     const fwdReq = client.request(opts, fwdRes => {
-      console.log('上游响应状态:', fwdRes.statusCode);
       
       // ── 流式响应处理 ─────────────────────────────────────────────
       if (stream) {
@@ -378,7 +376,6 @@ function handleMessages(req, res, body) {
       res.end(JSON.stringify({ error: { type: 'api_error', message: '上游请求超时' } }));
     });
     
-    console.log('发送请求到上游:', baseUrl + '/chat/completions', 'model=' + model);
     fwdReq.write(postBody);
     fwdReq.end();
   }
@@ -402,12 +399,11 @@ function handleChat(req, res, body) {
     return;
   }
 
-  const configModel = config.OPENAI_MODEL || config.OLLAMA_MODEL || '';
+  const configModel = config.OPENAI_MODEL || config.CLAUDE_MODEL || config.OLLAMA_MODEL || '';
   const model      = mapModel(parsed.model, configModel);
   const messages   = parsed.messages || [];
   const baseUrl = config.OPENAI_BASE_URL || config.OLLAMA_BASE_URL || 'http://localhost:11434';
 
-  console.log('\n[POST /v1/chat/completions]  model=' + model + '  base=' + baseUrl);
 
   if (isOllamaUrl(baseUrl)) {
     ollamaChat(baseUrl, model, messages, (err, content) => {
@@ -474,8 +470,6 @@ function handleChat(req, res, body) {
 
 // ── 主服务器 ────────────────────────────────────────────────────────
 const server = http.createServer((req, res) => {
-  // 记录所有请求
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -515,7 +509,7 @@ const server = http.createServer((req, res) => {
 
   if (req.url === '/v1/models' && req.method === 'GET') {
     const config = getConfig();
-    const model = config ? (config.OPENAI_MODEL || config.OLLAMA_MODEL || 'unknown') : 'unknown';
+    const model = config ? (config.OPENAI_MODEL || config.CLAUDE_MODEL || config.OLLAMA_MODEL || 'unknown') : 'unknown';
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       object: 'list',
