@@ -211,6 +211,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ── API 路由 ──────────────────────────────────────────────────────
 
+// GET /api/status — 供部署脚本检测是否已配置
+app.get('/api/status', (req, res) => {
+  const groups = readGroups();
+  const active = readActive();
+  res.json({
+    configured: groups.length > 0,
+    activeGroupId: active.activeGroupId,
+    activeModel: active.activeModel
+  });
+});
+
 // GET /api/configs — 返回所有配置组
 app.get('/api/configs', (req, res) => {
   const groups = readGroups();
