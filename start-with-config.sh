@@ -38,7 +38,7 @@ cd ..
 sleep 1
 
 echo "🔄 启动动态代理服务器 (自动路由模型)..."
-# 使用代理模式：Claude 连接 localhost:11435，代理动态转发到正确的后端
+# 使用代理模式：Claude 连接 localhost:12654，代理动态转发到正确的后端
 cd model-config-server
 if [ ! -d "node_modules" ]; then
     npm install chokidar
@@ -55,7 +55,7 @@ load_env_file
 echo ""
 echo "════════════════════════════════════════════════════"
 echo "  模型配置管理界面: http://localhost:3000"
-echo "  动态代理: http://localhost:11435"
+echo "  动态代理: http://localhost:12654"
 echo "  当前模型: ${CLAUDE_MODEL:-${OPENAI_MODEL:-未设置}}"
 echo "════════════════════════════════════════════════════"
 echo ""
@@ -65,7 +65,8 @@ echo "   2. 代理自动更新配置，无需重启 Claude"
 echo ""
 
 # 修改环境变量指向代理
-export OPENAI_BASE_URL="http://localhost:11435"
+export OPENAI_BASE_URL="http://localhost:12654"
+export ANTHROPIC_BASE_URL="http://localhost:12654"
 export ANTHROPIC_API_KEY="sk-dummy"  # 代理不需要真实 key
 
 # 启动 Claude Code

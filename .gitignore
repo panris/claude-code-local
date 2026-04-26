@@ -3,6 +3,7 @@ node_modules
 dist
 coverage
 .env
+.env.*
 *.log
 .idea
 .vscode
@@ -15,9 +16,10 @@ src/utils/vendor/
 .codex/
 .omx/
 
-# Binary / screenshot files (root only)
+# Binary / screenshot files
 /*.png
 *.bmp
+contributors.svg
 
 # Agent / tool state dirs
 .swarm/
@@ -27,3 +29,12 @@ src/utils/vendor/
 __pycache__/
 *.pyc
 logs
+
+# Upstream dev artifacts
+V6.md
+DEV-LOG.md
+knip.json
+
+# Lock files
+bun.lock
+package-lock.json

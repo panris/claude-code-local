@@ -635,16 +635,12 @@
         // 加载配置
         async function loadConfigs() {
             try {
-                const [configsRes, activeRes] = await Promise.all([
-                    fetch('/api/configs'),
-                    fetch('/api/active')
-                ]);
+                const configsRes = await fetch('/api/configs');
                 const configsData = await configsRes.json();
-                const activeData = await activeRes.json();
                 
                 configs = configsData.configs || [];
-                activeConfig = activeData.activeConfig;
-                currentModel = activeData.model;
+                activeConfig = configsData.activeConfig;
+                currentModel = configsData.activeModel;
                 
                 renderConfigList();
                 updateJsonPreview();
@@ -895,8 +891,11 @@
                 });
                 
                 if (res.ok) {
-                    await loadConfigs();
-                    showToast(`已激活配置组: ${name}`);
+                    const data = await res.json();
+                    activeConfig = name;
+                    currentModel = data.activeModel || name;
+                    renderConfigList();
+                    showToast(`已激活: ${name} (${currentModel})`);
                 } else {
                     const error = await res.json();
                     showToast(error.error || '激活失败', 'error');
@@ -916,8 +915,10 @@
                 });
                 
                 if (res.ok) {
-                    await loadConfigs();
-                    showToast(`已切换到模型: ${model}`);
+                    activeConfig = configName;
+                    currentModel = model;
+                    renderConfigList();
+                    showToast(`已切换到: ${model}`);
                 } else {
                     const error = await res.json();
                     showToast(error.error || '切换失败', 'error');
