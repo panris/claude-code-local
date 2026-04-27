@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const PROXY_PORT = 12654;
+const PROXY_PORT = 12655;
 const PROXY_HOST = '127.0.0.1';
 
 // ── 提供商模板 ──────────────────────────────────────────────────────

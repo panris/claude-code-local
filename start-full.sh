@@ -5,7 +5,7 @@
 set -e
 cd "$(dirname "$0")"
 
-PROXY_PORT=12654
+PROXY_PORT=12655
 CONFIG_PORT=3000
 PID_SERVER=""
 PID_PROXY=""

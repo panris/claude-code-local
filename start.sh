@@ -9,7 +9,7 @@ SCRIPT_DIR="$PWD"
 SERVER_DIR="$SCRIPT_DIR/model-config-server"
 HOME_DIR="$HOME/.claude"
 
-PROXY_PORT=12654
+PROXY_PORT=12655
 CONFIG_PORT=3000
 
 # ── 颜色输出（检测终端支持）──────────────────────────────────────

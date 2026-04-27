@@ -2,7 +2,7 @@
 /**
  * Claude Proxy — Anthropic/OpenAI 兼容 API 代理
  *
- * 监听端口: 12654
+ * 监听端口: 12655
  * 配置: ~/.claude/.env
  *
  * 支持端点:
@@ -20,7 +20,7 @@ const path  = require('path');
 const os    = require('os');
 
 // ── 配置 ──────────────────────────────────────────────────────────────
-const PROXY_PORT = 12654;
+const PROXY_PORT = 12655;
 const HOST       = '0.0.0.0';
 
 // ── 读取 .env ─────────────────────────────────────────────────────────
