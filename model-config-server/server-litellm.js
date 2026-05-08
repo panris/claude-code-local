@@ -24,6 +24,7 @@ const PROVIDER_TEMPLATES = {
   anthropic: { name: 'Anthropic',       baseUrl: 'https://api.anthropic.com/v1',                   models: ['claude-sonnet-4-20250514', 'claude-opus-4-6'] },
   ollama:    { name: 'Ollama (本地)',    baseUrl: 'http://localhost:11434',                        models: ['llama3', 'qwen2.5', 'gemma2'] },
   groq:      { name: 'Groq (免费)',      baseUrl: 'https://api.groq.com/openai/v1',                models: ['llama-3.1-8b-instant', 'llama-3.2-1b-preview', 'llama-3.2-3b-preview', 'mixtral-8x7b-32768'] },
+  evol:      { name: 'Evol (本地代理)',  baseUrl: 'http://127.0.0.1:12654/openclaw-proxy/v1',     models: ['claude-opus-4-6', 'claude-sonnet-4-6', 'claude-haiku-4-5-20251001', 'gpt-5.3-codex', 'gpt-5.4', 'gemini-3-flash-preview', 'gemini-3.1-pro-preview', 'glm-4.7', 'glm-5', 'kimi-k2.5', 'MiniMax-M2.5', 'deepseek-v3.2', 'glm-5.1', 'Claude-opus-4-7', 'gpt-5.5', 'deepseek-v4-flash', 'deepseek-v4-pro', 'kimi-k2.6', 'MiniMax-M2.7'] },
   custom:    { name: '自定义 API',       baseUrl: '',                                              models: [] }
 };
 
@@ -72,6 +73,7 @@ function detectProvider(baseUrl) {
   if (baseUrl.includes('volces.com')) return 'ark';
   if (baseUrl.includes('localhost:11434') || baseUrl.includes('127.0.0.1:11434')) return 'ollama';
   if (baseUrl.includes('groq.com')) return 'groq';
+  if (baseUrl.includes('127.0.0.1:12654') || baseUrl.includes('/openclaw-proxy')) return 'evol';
   return 'custom';
 }
 

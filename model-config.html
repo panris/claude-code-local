@@ -394,6 +394,10 @@
 <body>
     <div class="container">
         <h1>🤖 Claude Code 模型配置管理</h1>
+        <p style="color: #888; margin-top: 8px;">
+            支持配置 Anthropic、OpenAI、Gemini、Grok、Evol (本地代理) 等多种 API 提供商
+            <br><strong style="color: #f59e0b;">Evol 使用提示：</strong>选择 Evol 提供商前，请确保 Evol 客户端已在本地运行 (127.0.0.1:12654)
+        </p>
         <p class="subtitle">管理多个 AI 模型配置，快速切换不同的 API 提供商和模型</p>
 
         <div class="tabs">
@@ -454,6 +458,7 @@
                         <option value="openai">OpenAI (GPT)</option>
                         <option value="gemini">Google Gemini</option>
                         <option value="grok">xAI Grok</option>
+                        <option value="evol">Evol (本地代理)</option>
                         <option value="custom">自定义 API</option>
                     </select>
                 </div>
@@ -528,6 +533,14 @@
                 { id: 'grok-3', name: 'Grok 3' },
                 { id: 'grok-2', name: 'Grok 2' },
             ],
+            evol: [
+                { id: 'claude-opus-4-6', name: 'Claude Opus 4.6 (Evol)' },
+                { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6 (Evol)' },
+                { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5 (Evol)' },
+                { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro' },
+                { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash' },
+                { id: 'Claude-opus-4-7', name: 'Claude Opus 4.7 (Evol)' },
+            ],
             custom: []
         };
 
@@ -537,6 +550,7 @@
             openai: { key: 'OPENAI_API_KEY', baseUrl: 'OPENAI_BASE_URL', model: 'OPENAI_MODEL' },
             gemini: { key: 'GEMINI_API_KEY', baseUrl: 'GEMINI_BASE_URL', model: 'GEMINI_MODEL' },
             grok: { key: 'GROK_API_KEY', baseUrl: 'GROK_BASE_URL', model: 'GROK_MODEL' },
+            evol: { key: 'EVOL_API_KEY', baseUrl: 'EVOL_BASE_URL', model: 'EVOL_MODEL', defaultBaseUrl: 'http://127.0.0.1:12654/openclaw-proxy/v1' },
             custom: { key: 'CUSTOM_API_KEY', baseUrl: 'CUSTOM_BASE_URL', model: 'CUSTOM_MODEL' }
         };
 
@@ -546,6 +560,7 @@
             openai: 'OpenAI',
             gemini: 'Gemini',
             grok: 'Grok',
+            evol: 'Evol (本地代理)',
             custom: '自定义'
         };
 
@@ -658,9 +673,14 @@
             
             // 显示/隐藏 baseUrl 输入
             const baseUrlGroup = document.getElementById('baseurl-group');
+            const baseUrlInput = document.getElementById('config-baseurl');
             if (env.baseUrl) {
                 baseUrlGroup.style.display = 'block';
                 document.getElementById('baseurl-hint').textContent = `对应环境变量: ${env.baseUrl}`;
+                // Evol 提供商自动填充默认 Base URL
+                if (env.defaultBaseUrl && !baseUrlInput.value) {
+                    baseUrlInput.value = env.defaultBaseUrl;
+                }
             } else {
                 baseUrlGroup.style.display = 'none';
             }
