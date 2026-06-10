@@ -18,6 +18,10 @@ src/utils/vendor/
 
 # Binary / screenshot files
 /*.png
+
+# Runtime config (contains API keys)
+config-groups.json
+litellm_config.yaml
 *.bmp
 contributors.svg
 

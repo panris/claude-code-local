@@ -49,6 +49,10 @@ function isOllamaUrl(url) {
   return url && (url.includes('localhost:11434') || url.includes('127.0.0.1:11434'));
 }
 
+function isDmxApiUrl(url) {
+  return url && (url.includes('dmxapi.cn') || url.includes('dmxapi.com'));
+}
+
 // ── 日志 ───────────────────────────────────────────────────────────────
 const LOG_FILE = path.join(os.homedir(), '.claude', 'proxy-transcript.log');
 
@@ -174,6 +178,121 @@ function handleMessages(req, res, body) {
 
   // 读取 baseUrl（优先用 OPENAI_BASE_URL_FULL，再用 OPENAI_BASE_URL）
   // baseUrl 已在函数顶部声明，这里直接使用
+
+  if (isDmxApiUrl(baseUrl)) {
+    // ── DMXAPI — Anthropic /v1/messages 直连 ───────────────────────
+    const forwardUrl = parseUrl(baseUrl + '/messages');
+    if (!forwardUrl) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { type: 'api_error', message: '无效的 DMXAPI baseUrl: ' + baseUrl } }));
+      return;
+    }
+    const apiKey = config.OPENAI_API_KEY || 'test';
+    const requestBody = {
+      model,
+      messages,
+      max_tokens: maxTokens,
+      stream
+    };
+    if (temperature !== undefined) requestBody.temperature = temperature;
+    if (topP !== undefined) requestBody.top_p = topP;
+    if (systemPrompt) requestBody.system = systemPrompt;
+
+    const opts = {
+      hostname: forwardUrl.hostname,
+      port:     forwardUrl.port || 443,
+      path:     forwardUrl.pathname + forwardUrl.search,
+      method:   'POST',
+      timeout:  120000,
+      headers:  {
+        'Content-Type':      'application/json',
+        'Authorization':     'Bearer ' + apiKey,
+        'anthropic-version': '2023-06-01'
+      }
+    };
+
+    const client = forwardUrl.protocol === 'https:' ? https : http;
+    const fwdReq = client.request(opts, fwdRes => {
+      if (stream) {
+        if (fwdRes.statusCode >= 400) {
+          let errData = '';
+          fwdRes.on('data', c => errData += c);
+          fwdRes.on('end', () => {
+            res.writeHead(fwdRes.statusCode, { 'Content-Type': 'application/json' });
+            res.end(errData || JSON.stringify({ error: { type: 'api_error', message: 'DMXAPI 上游错误: ' + fwdRes.statusCode } }));
+          });
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
+        let buffer = '';
+        fwdRes.on('data', chunk => {
+          buffer += chunk.toString();
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6);
+            if (data === '[DONE]') { res.write('event: message_stop\n\n'); continue; }
+            try {
+              const json = JSON.parse(data);
+              // DMXAPI 返回 OpenAI SSE 格式，转为 Claude SSE
+              const delta = json.choices?.[0]?.delta;
+              if (delta?.content) {
+                res.write('event: content_block_delta\n');
+                res.write('data: ' + JSON.stringify({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: delta.content } }) + '\n\n');
+              }
+              if (json.choices?.[0]?.finish_reason) {
+                res.write('event: message_delta\n');
+                res.write('data: ' + JSON.stringify({ type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: json.usage?.completion_tokens || 0 } }) + '\n\n');
+              }
+            } catch (_) {}
+          }
+        });
+        fwdRes.on('end', () => res.end());
+        return;
+      }
+
+      let data = '';
+      fwdRes.on('data', c => data += c);
+      fwdRes.on('end', () => {
+        if (fwdRes.statusCode >= 400) {
+          res.writeHead(fwdRes.statusCode, { 'Content-Type': 'application/json' });
+          res.end(data);
+          return;
+        }
+        try {
+          const json = JSON.parse(data);
+          // DMXAPI 返回 Anthropic 格式 message
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            id:         json.id || 'msg-' + Date.now(),
+            type:       'message',
+            role:       'assistant',
+            content:    json.content || [{ type: 'text', text: '' }],
+            model,
+            stop_reason: json.stop_reason || 'end_turn',
+            stop_sequence: json.stop_sequence || null,
+            usage:      json.usage || { input_tokens: 0, output_tokens: 0 }
+          }));
+        } catch (e) {
+          res.writeHead(502, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: { type: 'api_error', message: 'DMXAPI 响应解析失败' } }));
+        }
+      });
+    });
+    fwdReq.on('error', e => {
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { type: 'api_error', message: 'DMXAPI 连接失败: ' + e.message } }));
+    });
+    fwdReq.on('timeout', () => {
+      fwdReq.destroy();
+      res.writeHead(504, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: { type: 'api_error', message: 'DMXAPI 请求超时（2分钟）' } }));
+    });
+    fwdReq.write(JSON.stringify(requestBody));
+    fwdReq.end();
+    return;
+  }
 
   if (isOllamaUrl(baseUrl)) {
     // ── Ollama ───────────────────────────────────────────────────────

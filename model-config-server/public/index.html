@@ -446,7 +446,7 @@ function openEditModal(id) {
   document.getElementById('group-apikey').value = g.apiKey || '';
   document.getElementById('group-baseurl').value = g.baseUrl || '';
   document.getElementById('group-models').value = (g.models || []).join(', ');
-  onProviderChange();
+  onProviderChange(true);
   document.getElementById('modal').classList.add('show');
 }
 
@@ -455,10 +455,12 @@ function closeModal() {
   editingId = null;
 }
 
-function onProviderChange() {
+function onProviderChange(editing = false) {
   const p = document.getElementById('group-provider').value;
   const hint = BASE_URL_HINTS[p] || '';
-  document.getElementById('group-baseurl').value = hint;
+  const currentBaseUrl = document.getElementById('group-baseurl').value;
+  // 编辑模式：已有值则保留，没有则用 hint；新建模式：始终用 hint
+  document.getElementById('group-baseurl').value = (editing && currentBaseUrl) ? currentBaseUrl : hint;
   document.getElementById('baseurl-hint').textContent = hint ? hint + '（通常不需要改）' : '选完提供商后自动填写，通常不需要改';
   if (!editingId && PRESET_MODELS[p] && PRESET_MODELS[p].length > 0) {
     document.getElementById('group-models').value = PRESET_MODELS[p][0];
